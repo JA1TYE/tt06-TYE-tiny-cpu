@@ -5,7 +5,7 @@
 
 `define default_netname none
 
-module tt_um_example (
+module tt_um_ja1tye_tiny_cpu (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path
@@ -20,5 +20,11 @@ module tt_um_example (
   assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
   assign uio_oe  = 0;
+
+  always_comb begin
+    if (ena == 1'b1) begin
+      uo_out = ui_in + uio_in;
+    end
+  end
 
 endmodule
