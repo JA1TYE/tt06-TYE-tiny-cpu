@@ -17,13 +17,15 @@ module tt_um_ja1tye_tiny_cpu (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out = 0;
   assign uio_oe  = 0;
 
   always_comb begin
     if (ena == 1'b1) begin
       uo_out = ui_in + uio_in;
+    end
+    else begin
+      uo_out = 0;
     end
   end
 
