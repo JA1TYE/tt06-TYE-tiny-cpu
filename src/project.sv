@@ -19,13 +19,16 @@ module tt_um_ja1tye_tiny_cpu (
   // All output pins must be assigned. If not used, assign to 0.
   assign uio_out = 0;
   assign uio_oe  = 0;
+  assign uo_out  = uo_out_temp;
+
+  logic [7:0] uo_out_temp;
 
   always_comb begin
     if (ena == 1'b1) begin
-      uo_out = ui_in + uio_in;
+      uo_out_temp = ui_in + uio_in;
     end
     else begin
-      uo_out = 0;
+      uo_out_temp = 0;
     end
   end
 
