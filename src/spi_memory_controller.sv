@@ -1,41 +1,63 @@
+typedef enum logic [1:0] {
+    TYPE_IDLE = 2'b00,
+    TYPE_FLASH_READ = 2'b01,
+    TYPE_PSRAM_READ = 2'b10,
+    TYPE_PSRAM_WRITE = 2'b11
+} mem_type_t;
+
 module spi_flash_controller (
     //Control signals
     input wire clk_in,
     input wire reset_in,
 
-    //SPI signals
+    //SPI common signals
     output logic sclk_out,
-    output logic cs_out,
     output logic mosi_out,
     input wire miso_in,
+
+    output logic flash_cs_out,
+    output logic psram_cs_out,
 
     //System bus signals
     //Note: This module is designed for 16-bit data bus,
     //      and lowest bit of addr_in is ignored.
     //      When you set 0x001F (it will be treated as 0x001E!)
     //      as addr_in value,you can get 16-bit data like below:
-    //      data_out[15:8] = data in 0x001F
-    //      data_out[7:0]  = data in 0x001E
-    input wire [15:0] addr_in,
-    input wire addr_valid_in,
-    output reg [15:0] data_out,
-    output reg data_valid_out,
+    //      flash_data_out[15:8] = data in 0x001E
+    //      flash_data_out[7:0]  = data in 0x001F
+    input logic [15:0] addr_in,
+    input logic addr_valid_in,
+    input logic [7:0] psram_data_in,
+    input mem_type_t mem_type_in,
+    output logic [15:0] flash_data_out,
+    output logic flash_data_valid_out,
+    output logic [7:0]psram_data_out,
+    output logic psram_data_valid_out,
     output reg busy_out
 );
 
-enum logic [2:0] {
+import common_pkg::*;
+
+enum logic [3:0] {
     IDLE,
-    SEND_CMD,
+    SEND_FLASH_READ_CMD,
+    SEND_PSRAM_READ_CMD,
+    SEND_PSRAM_WRITE_CMD,
     SEND_ADDR_ZERO,
     SEND_ADDR_HIGH,
     SEND_ADDR_LOW,
-    READ_DATA_HIGH,
-    READ_DATA_LOW
+    READ_FLASH_DATA_HIGH,
+    READ_FLASH_DATA_LOW,
+    READ_PSRAM,
+    WRITE_PSRAM
 } state;
+
+mem_type_t mem_type;
 
 logic [15:0] addr_reg;
 logic [3:0] clock_counter;
 logic [7:0] shift_reg;
+logic [7:0] write_data_reg;
 logic miso_buf;
 
 assign mosi_out = shift_reg[7];
@@ -44,13 +66,18 @@ always@(posedge clk_in)begin
     if(reset_in)begin
         state <= IDLE;
         sclk_out <= 1'b0;
-        cs_out <= 1'b1;
+        flash_cs_out <= 1'b1;
+        psram_cs_out <= 1'b1;
         shift_reg <= 8'h00;
         miso_buf <= 1'b0;
 
-        data_out <= 16'b0;
-        data_valid_out<= 1'b0;
+        flash_data_out <= 16'b0;
+        flash_data_valid_out<= 1'b0;
+        psram_data_out <= 8'b0;
+        psram_data_valid_out <= 1'b0;
         busy_out <= 1'b0;
+        
+        write_data_reg <= 8'h00;
 
         clock_counter <= 5'b0;
     end
@@ -58,20 +85,39 @@ always@(posedge clk_in)begin
         if(state == IDLE)begin
             if(addr_valid_in == 1'b1)begin
                 addr_reg <= addr_in;
+                mem_type <= mem_type_in;
                 busy_out <= 1'b1;
-                data_valid_out <= 1'b0;
+                flash_data_valid_out <= 1'b0;
+                psram_data_valid_out <= 1'b0;
+
                 clock_counter <= 4'h0;
-                cs_out <= 1'b0;
+                
+                if(mem_type_in == TYPE_FLASH_READ)begin
+                    state <= SEND_FLASH_READ_CMD;
+                    shift_reg <= 8'h03;
+                    flash_cs_out <= 1'b0;
+                end
+                else if(mem_type_in == TYPE_PSRAM_READ)begin
+                    state <= SEND_PSRAM_READ_CMD;
+                    shift_reg <= 8'h03;
+                    psram_cs_out <= 1'b0;
+                end
+                else if(mem_type_in == TYPE_PSRAM_WRITE)begin
+                    state <= SEND_PSRAM_WRITE_CMD;
+                    shift_reg <= 8'h02;
+                    write_data_reg <= psram_data_in;
+                    psram_cs_out <= 1'b0;
+                end
                 sclk_out <= 1'b0;
-                shift_reg <= 8'h03;
                 miso_buf <= miso_in;
-                state <= SEND_CMD;
             end
             else begin
                 busy_out <= 1'b0;
-                data_valid_out <= 1'b0;
+                flash_data_valid_out <= 1'b0;
+                psram_data_valid_out <= 1'b0;
                 clock_counter <= 4'h0;
-                cs_out <= 1'b1;
+                flash_cs_out <= 1'b1;
+                psram_cs_out <= 1'b1;
                 sclk_out <= 1'b0;
             end
         end
@@ -95,7 +141,10 @@ always@(posedge clk_in)begin
 
         //State Machine for shift register
         if(clock_counter == 4'h7 && sclk_out == 1'b1)begin
-            if(state == SEND_CMD)begin
+            if(
+            state == SEND_FLASH_READ_CMD ||
+            state == SEND_PSRAM_READ_CMD ||
+            state == SEND_PSRAM_WRITE_CMD)begin
                 shift_reg <= 8'h00;//Address[23:16]
                 state <= SEND_ADDR_ZERO;
             end
@@ -108,23 +157,44 @@ always@(posedge clk_in)begin
                 state <= SEND_ADDR_LOW;
             end
             else if(state == SEND_ADDR_LOW)begin
-                shift_reg <= 8'h00;
-                state <= READ_DATA_HIGH;
+                if(mem_type == TYPE_FLASH_READ)begin
+                    shift_reg <= 8'h00;
+                    state <= READ_FLASH_DATA_HIGH;
+                end
+                else if(mem_type == TYPE_PSRAM_READ)begin
+                    shift_reg <= 8'h00;
+                    state <= READ_PSRAM;
+                end
+                else if(mem_type == TYPE_PSRAM_WRITE)begin
+                    shift_reg <= write_data_reg;
+                    state <= WRITE_PSRAM;
+                end
             end
-            else if(state == READ_DATA_HIGH)begin
-                data_out[15:8] <= {shift_reg[6:0],miso_buf};
-                state <= READ_DATA_LOW;
+            else if(state == READ_FLASH_DATA_HIGH)begin
+                flash_data_out[15:8] <= {shift_reg[6:0],miso_buf};
+                state <= READ_FLASH_DATA_LOW;
             end
-            else if(state == READ_DATA_LOW)begin
-                data_out[7:0] <= {shift_reg[6:0],miso_buf};
-                data_valid_out <= 1'b1;
-                cs_out <= 1'b1;
+            else if(state == READ_FLASH_DATA_LOW)begin
+                flash_data_out[7:0] <= {shift_reg[6:0],miso_buf};
+                flash_data_valid_out <= 1'b1;
+                flash_cs_out <= 1'b1;
+                busy_out <= 1'b0;
+                state <= IDLE;
+            end
+            else if(state == READ_PSRAM)begin
+                psram_data_out <= {shift_reg[6:0],miso_buf};
+                psram_data_valid_out <= 1'b1;
+                psram_cs_out <= 1'b1;
+                busy_out <= 1'b0;
+                state <= IDLE;
+            end
+            else if(state == WRITE_PSRAM)begin
+                psram_cs_out <= 1'b1;
                 busy_out <= 1'b0;
                 state <= IDLE;
             end
         end
     end
 end
-
 
 endmodule
