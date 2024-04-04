@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Your Name
+ * Copyright (c) 2024 Ryota Suzuki
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -15,21 +15,32 @@ module tt_um_ja1tye_tiny_cpu (
     input  wire       clk,
     input  wire       rst_n
 );
+    logic miso_in;
+    logic sclk_out;
+    logic flash_cs_out;
+    logic psram_cs_out;
+    logic mosi_out;
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uio_out = 0;
-  assign uio_oe  = 0;
-  assign uo_out  = uo_out_temp;
+    // All output pins must be assigned. If not used, assign to 0.
+    assign uio_out = 0;
+    assign uio_oe  = 0;
 
-  logic [7:0] uo_out_temp;
+    assign miso_in = ui_in[0];
 
-  always_comb begin
-    if (ena == 1'b1) begin
-      uo_out_temp = ui_in + uio_in;
-    end
-    else begin
-      uo_out_temp = 0;
-    end
-  end
+    assign uo_out[0] = sclk_out;
+    assign uo_out[1] = flash_cs_out;
+    assign uo_out[2] = psram_cs_out;
+    assign uo_out[3] = mosi_out;
+    assign uo_out[7:4] = 4'h0;
+
+  tiny_mcu MCU(
+    .clk_in(clk),
+    .reset_in(~rst_n),
+    .sclk_out(sclk_out),
+    .flash_cs_out(flash_cs_out),
+    .psram_cs_out(psram_cs_out),
+    .mosi_out(mosi_out),
+    .miso_in(miso_in)
+  );
 
 endmodule

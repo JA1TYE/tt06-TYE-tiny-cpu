@@ -1,9 +1,4 @@
-typedef enum logic [1:0] {
-    TYPE_IDLE = 2'b00,
-    TYPE_FLASH_READ = 2'b01,
-    TYPE_PSRAM_READ = 2'b10,
-    TYPE_PSRAM_WRITE = 2'b11
-} mem_type_t;
+import common_pkg::*;
 
 module spi_flash_controller (
     //Control signals
@@ -36,7 +31,6 @@ module spi_flash_controller (
     output reg busy_out
 );
 
-import common_pkg::*;
 
 enum logic [3:0] {
     IDLE,
@@ -92,17 +86,17 @@ always@(posedge clk_in)begin
 
                 clock_counter <= 4'h0;
                 
-                if(mem_type_in == TYPE_FLASH_READ)begin
+                if(mem_type_in == TYPE_IMEM_READ)begin
                     state <= SEND_FLASH_READ_CMD;
                     shift_reg <= 8'h03;
                     flash_cs_out <= 1'b0;
                 end
-                else if(mem_type_in == TYPE_PSRAM_READ)begin
+                else if(mem_type_in == TYPE_DMEM_READ)begin
                     state <= SEND_PSRAM_READ_CMD;
                     shift_reg <= 8'h03;
                     psram_cs_out <= 1'b0;
                 end
-                else if(mem_type_in == TYPE_PSRAM_WRITE)begin
+                else if(mem_type_in == TYPE_DMEM_WRITE)begin
                     state <= SEND_PSRAM_WRITE_CMD;
                     shift_reg <= 8'h02;
                     write_data_reg <= psram_data_in;
@@ -157,21 +151,22 @@ always@(posedge clk_in)begin
                 state <= SEND_ADDR_LOW;
             end
             else if(state == SEND_ADDR_LOW)begin
-                if(mem_type == TYPE_FLASH_READ)begin
+                if(mem_type == TYPE_IMEM_READ)begin
                     shift_reg <= 8'h00;
                     state <= READ_FLASH_DATA_HIGH;
                 end
-                else if(mem_type == TYPE_PSRAM_READ)begin
+                else if(mem_type == TYPE_DMEM_READ)begin
                     shift_reg <= 8'h00;
                     state <= READ_PSRAM;
                 end
-                else if(mem_type == TYPE_PSRAM_WRITE)begin
+                else if(mem_type == TYPE_DMEM_WRITE)begin
                     shift_reg <= write_data_reg;
                     state <= WRITE_PSRAM;
                 end
             end
             else if(state == READ_FLASH_DATA_HIGH)begin
                 flash_data_out[15:8] <= {shift_reg[6:0],miso_buf};
+                shift_reg <= 8'h00;
                 state <= READ_FLASH_DATA_LOW;
             end
             else if(state == READ_FLASH_DATA_LOW)begin
