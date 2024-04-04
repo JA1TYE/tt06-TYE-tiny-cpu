@@ -172,6 +172,9 @@ module tiny_mcu (
         else if(seq_state == STATE_STORE_MEM)begin
             mem_type = TYPE_DMEM_WRITE;
         end
+        else begin
+            mem_type = TYPE_IDLE;
+        end
     end
     spi_flash_controller SPI_CTRL(
         .clk_in(clk_in),
