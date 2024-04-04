@@ -17,7 +17,7 @@ sys_state_t state;
 
 assign seq_state_out = state;
 
-always@(posedge clk_in or posedge reset_in) begin
+always@(posedge clk_in) begin
     if(reset_in) begin
         state <= STATE_FETCH;
     end else begin

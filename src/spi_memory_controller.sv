@@ -70,7 +70,7 @@ always@(posedge clk_in)begin
         
         write_data_reg <= 8'h00;
 
-        clock_counter <= 5'b0;
+        clock_counter <= 4'b0;
     end
     else begin
         if(state == IDLE)begin
