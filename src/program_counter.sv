@@ -1,5 +1,3 @@
-import common_pkg::*;
-
 module program_counter(
     input logic clk_in,
     input logic reset_in,

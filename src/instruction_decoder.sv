@@ -11,8 +11,6 @@ module inst_decoder (
     output logic [3:0] subtype_flag_out
 );
 
-import common_pkg::*;
-
 assign dst_addr_out = inst_in[7:5];
 assign src_addr_out = inst_in[10:8];
 assign imm_out = inst_in[7:0];

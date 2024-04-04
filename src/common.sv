@@ -1,7 +1,3 @@
-`ifndef COMMON_PKG
-`define COMMON_PKG
-package common_pkg;
-
 typedef enum logic [1:0] {
     TYPE_IDLE = 2'b00,
     TYPE_IMEM_READ = 2'b01,
@@ -20,6 +16,3 @@ typedef enum logic [3:0] {
     STATE_STORE_MEM_WAIT = 4'h7,
     STATE_UPDATE_PC = 4'h8
 } sys_state_t;
-
-endpackage
-`endif

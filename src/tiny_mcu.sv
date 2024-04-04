@@ -1,4 +1,3 @@
-import common_pkg::*;
 `default_nettype none
 module tiny_mcu (
     input logic clk_in,
@@ -11,6 +10,7 @@ module tiny_mcu (
     output logic mosi_out,
     input logic miso_in
 );
+
     //Internal signals for sequencer
     sys_state_t seq_state;
     sequencer CPU_SEQ(

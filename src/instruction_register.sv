@@ -1,5 +1,3 @@
-import common_pkg::*;
-
 module instruction_register(
     input logic clk_in,
     input logic reset_in,

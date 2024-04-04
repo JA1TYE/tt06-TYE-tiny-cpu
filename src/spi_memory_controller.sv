@@ -1,5 +1,3 @@
-import common_pkg::*;
-
 module spi_flash_controller (
     //Control signals
     input wire clk_in,
@@ -30,7 +28,6 @@ module spi_flash_controller (
     output logic psram_data_valid_out,
     output reg busy_out
 );
-
 
 enum logic [3:0] {
     IDLE,

@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 
 module top_sim();
-    import common_pkg::*;
     //Control signals
     logic clk_in;
     logic reset_in;
