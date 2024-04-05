@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
+`default_nettype none
 
 module spi_mem_sim();
-    import common_pkg::*;
     //Control signals
     logic clk_in;
     logic reset_in;
@@ -22,7 +22,7 @@ module spi_mem_sim();
     logic [7:0] psram_data_out;
     logic psram_data_valid_out;
     logic busy_out;
-
+    
     mem_type_t mem_type_in;
 
     logic flash_miso_out;
@@ -74,7 +74,7 @@ module spi_mem_sim();
         clk_in <= 1'b0;
         reset_in <= 1'b1;
         addr_valid_in <=1'b0;
-        mem_type_in <= TYPE_FLASH_READ;
+        mem_type_in <= TYPE_IMEM_READ;
         addr_in <= 16'h0004;
         repeat(10)@(posedge clk_in);
         reset_in    <= 0;
@@ -89,7 +89,7 @@ module spi_mem_sim();
 
         @(posedge clk_in);
         addr_valid_in <= 1'b1;
-        mem_type_in <= TYPE_PSRAM_READ;
+        mem_type_in <= TYPE_DMEM_READ;
         count = 0;
         @(posedge clk_in);
         addr_valid_in <= 1'b0;
@@ -98,7 +98,7 @@ module spi_mem_sim();
 
         @(posedge clk_in);
         addr_valid_in <= 1'b1;
-        mem_type_in <= TYPE_PSRAM_WRITE;
+        mem_type_in <= TYPE_DMEM_WRITE;
         psram_data_in <= 8'h55;
         count = 0;
         @(posedge clk_in);
@@ -108,7 +108,7 @@ module spi_mem_sim();
 
         @(posedge clk_in);
         addr_valid_in <= 1'b1;
-        mem_type_in <= TYPE_PSRAM_READ;
+        mem_type_in <= TYPE_DMEM_READ;
         count = 0;
         @(posedge clk_in);
         addr_valid_in <= 1'b0;

@@ -53,6 +53,14 @@ logic miso_buf;
 
 assign mosi_out = shift_reg[7];
 
+assign busy_out = (state != IDLE);
+
+assign psram_data_valid_out = ((state == READ_PSRAM) & (clock_counter == 4'h7) & (sclk_out == 1'b1))?1'b1:1'b0;
+assign psram_data_out = {shift_reg[6:0],miso_buf};
+
+assign flash_data_valid_out = ((state == READ_FLASH_DATA_LOW) & (clock_counter == 4'h7) & (sclk_out == 1'b1))?1'b1:1'b0;
+assign flash_data_out = {write_data_reg,shift_reg[6:0],miso_buf};
+
 always@(posedge clk_in)begin
     if(reset_in)begin
         state <= IDLE;
@@ -61,12 +69,6 @@ always@(posedge clk_in)begin
         psram_cs_out <= 1'b1;
         shift_reg <= 8'h00;
         miso_buf <= 1'b0;
-
-        flash_data_out <= 16'b0;
-        flash_data_valid_out<= 1'b0;
-        psram_data_out <= 8'b0;
-        psram_data_valid_out <= 1'b0;
-        busy_out <= 1'b0;
         
         write_data_reg <= 8'h00;
 
@@ -77,9 +79,6 @@ always@(posedge clk_in)begin
             if(addr_valid_in == 1'b1)begin
                 addr_reg <= addr_in;
                 mem_type <= mem_type_in;
-                busy_out <= 1'b1;
-                flash_data_valid_out <= 1'b0;
-                psram_data_valid_out <= 1'b0;
 
                 clock_counter <= 4'h0;
                 
@@ -103,9 +102,6 @@ always@(posedge clk_in)begin
                 miso_buf <= miso_in;
             end
             else begin
-                busy_out <= 1'b0;
-                flash_data_valid_out <= 1'b0;
-                psram_data_valid_out <= 1'b0;
                 clock_counter <= 4'h0;
                 flash_cs_out <= 1'b1;
                 psram_cs_out <= 1'b1;
@@ -162,27 +158,17 @@ always@(posedge clk_in)begin
                 end
             end
             else if(state == READ_FLASH_DATA_HIGH)begin
-                flash_data_out[15:8] <= {shift_reg[6:0],miso_buf};
+                write_data_reg <= {shift_reg[6:0],miso_buf};
                 shift_reg <= 8'h00;
                 state <= READ_FLASH_DATA_LOW;
             end
             else if(state == READ_FLASH_DATA_LOW)begin
-                flash_data_out[7:0] <= {shift_reg[6:0],miso_buf};
-                flash_data_valid_out <= 1'b1;
-                flash_cs_out <= 1'b1;
-                busy_out <= 1'b0;
                 state <= IDLE;
             end
             else if(state == READ_PSRAM)begin
-                psram_data_out <= {shift_reg[6:0],miso_buf};
-                psram_data_valid_out <= 1'b1;
-                psram_cs_out <= 1'b1;
-                busy_out <= 1'b0;
                 state <= IDLE;
             end
             else if(state == WRITE_PSRAM)begin
-                psram_cs_out <= 1'b1;
-                busy_out <= 1'b0;
                 state <= IDLE;
             end
         end
