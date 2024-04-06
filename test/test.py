@@ -16,17 +16,13 @@ async def test_adder(dut):
   # Reset
   dut._log.info("Reset")
   dut.ena.value = 1
-  dut.ui_in.value = 0
-  dut.uio_in.value = 0
   dut.rst_n.value = 0
   await ClockCycles(dut.clk, 10)
   dut.rst_n.value = 1
 
   # Set the input values, wait one clock cycle, and check the output
   dut._log.info("Test")
-  dut.ui_in.value = 20
-  dut.uio_in.value = 30
 
-  await ClockCycles(dut.clk, 1)
-
-  assert dut.uo_out.value == 50
+  await ClockCycles(dut.clk, 100000)
+  dut._log.info(f"Result: {dut.user_project.MCU.pc_addr.value}")
+  assert dut.user_project.MCU.pc_addr.value == 0x001c
