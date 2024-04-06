@@ -16,11 +16,46 @@ module tb ();
   reg clk;
   reg rst_n;
   reg ena;
-  reg [7:0] ui_in;
+  wire [7:0] ui_in;
   reg [7:0] uio_in;
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
+
+  //SPI signals
+  wire flash_cs_out;
+  wire psram_cs_out;
+  wire sclk_out;
+  wire mosi_out;
+  tri miso_in;
+
+  wire flash_miso_out;
+  wire psram_miso_out;
+
+  assign ui_in[0] = miso_in;
+  assign ui_in[7:1] = 7'b0;
+  
+  assign sclk_out = uo_out[0];
+  assign flash_cs_out = uo_out[1];
+  assign psram_cs_out = uo_out[2];
+  assign mosi_out = uo_out[3];
+  assign miso_in = flash_miso_out;
+  assign miso_in = psram_miso_out;
+
+  //Peripherals for test
+  SPI_FLASH spi_flash(
+      .sclk_in(sclk_out),
+      .cs_in(flash_cs_out),
+      .mosi_in(mosi_out),
+      .miso_out(flash_miso_out)
+  );
+
+  SPI_PSRAM spi_psram(
+      .sclk_in(sclk_out),
+      .cs_in(psram_cs_out),
+      .mosi_in(mosi_out),
+      .miso_out(psram_miso_out)
+  );
 
   // Replace tt_um_example with your module name:
   tt_um_ja1tye_tiny_cpu user_project (

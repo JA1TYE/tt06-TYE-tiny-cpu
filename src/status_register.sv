@@ -16,7 +16,6 @@ module status_register (
 );
 
 logic [3:0] status_flag;
-logic status_result;
 assign status_out = status_flag;
 
 always@(posedge clk_in)begin

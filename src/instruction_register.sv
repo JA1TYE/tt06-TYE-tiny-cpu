@@ -12,7 +12,7 @@ logic [15:0] ir_data;
 
 assign ir_data_out = ir_data;
 
-always@(posedge clk_in or posedge reset_in) begin
+always@(posedge clk_in) begin
     if(reset_in) begin
         ir_data <= 16'h0;
     end
