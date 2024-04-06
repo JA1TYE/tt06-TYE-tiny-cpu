@@ -8,9 +8,9 @@ module mcu_peripheral(
     output logic cs_out,
 
     //GPIO signals
-    input logic [7:0] gpio_in,
+    input logic [3:0] gpio_in,
     output logic [7:0] gpio_out,
-    output logic [7:0] gpio_dir_out,
+    output logic [3:0] gpio_dir_out,
 
     //To Memory bus
     output logic [7:0] periph_data_out,
@@ -31,8 +31,8 @@ module mcu_peripheral(
 //0xfx07:SPI Data
 
 //2FF Synchronizer for GPIO input
-logic [7:0] gpio_in_sync;
-logic [7:0] gpio_in_reg;
+logic [3:0] gpio_in_sync;
+logic [3:0] gpio_in_reg;
 
 //SPI Shift Register
 logic [7:0] shift_reg;
@@ -91,7 +91,7 @@ always@(posedge clk_in) begin
             if(periph_write_en_in) begin//Write
                 case(periph_addr_in[2:0])
                     4'h0:begin//GPIO Dir
-                        gpio_dir_out <= periph_data_in;
+                        gpio_dir_out <= periph_data_in[3:0];
                     end
                     4'h1:begin//GPIO Out
                         gpio_out <= periph_data_in;
@@ -114,13 +114,13 @@ always@(posedge clk_in) begin
             else begin//Read
                 case(periph_addr_in[2:0])
                     4'h0:begin//GPIO Dir
-                        periph_data_out <= gpio_dir_out;
+                        periph_data_out <= {4'b1111,gpio_dir_out};
                     end
                     4'h1:begin//GPIO Out
                         periph_data_out <= gpio_out;
                     end
                     4'h2:begin//GPIO In
-                        periph_data_out <= gpio_in_reg;
+                        periph_data_out <= {4'b0000,gpio_in_reg};
                     end
                     4'h4:begin//SPI Divider Value
                         periph_data_out <= {4'h0,div_val_reg};

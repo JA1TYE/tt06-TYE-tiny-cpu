@@ -31,8 +31,8 @@ module tt_um_ja1tye_tiny_cpu (
     logic periph_spi_mosi_out;
     logic periph_spi_cs_out;
     logic [7:0] periph_gpio_out;
-    logic [7:0] periph_gpio_dir_out;
-    logic [7:0] periph_gpio_in;
+    logic [3:0] periph_gpio_dir_out;
+    logic [3:0] periph_gpio_in;
     logic pc_update_pulse_out;
 
     assign miso_in = ui_in[0];
@@ -47,8 +47,8 @@ module tt_um_ja1tye_tiny_cpu (
     assign uo_out[7] = pc_update_pulse_out;
 
     assign uio_out = periph_gpio_out;
-    assign uio_oe  = periph_gpio_dir_out;
-    assign periph_gpio_in = uio_in;
+    assign uio_oe  = {4'b1111,periph_gpio_dir_out};
+    assign periph_gpio_in = uio_in[3:0];
 
   tiny_mcu MCU(
     .clk_in(clk),

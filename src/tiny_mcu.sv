@@ -15,8 +15,8 @@ module tiny_mcu (
     output logic periph_spi_mosi_out,
     output logic periph_spi_cs_out,
     output logic [7:0] periph_gpio_out,
-    output logic [7:0] periph_gpio_dir_out,
-    input logic [7:0] periph_gpio_in,
+    output logic [3:0] periph_gpio_dir_out,
+    input logic [3:0] periph_gpio_in,
 
     //PC update pulse out for debugging
     output logic pc_update_pulse_out
