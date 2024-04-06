@@ -8,8 +8,21 @@ module tiny_mcu (
     output logic flash_cs_out,
     output logic psram_cs_out,
     output logic mosi_out,
-    input logic miso_in
+    input logic miso_in,
+
+    //Signals for peripherals
+    output logic periph_spi_sclk_out,
+    output logic periph_spi_mosi_out,
+    output logic periph_spi_cs_out,
+    output logic [7:0] periph_gpio_out,
+    output logic [7:0] periph_gpio_dir_out,
+    input logic [7:0] periph_gpio_in,
+
+    //PC update pulse out for debugging
+    output logic pc_update_pulse_out
 );
+
+    assign pc_update_pulse_out = (seq_state == STATE_UPDATE_PC);
 
     //Internal signals for sequencer
     sys_state_t seq_state;
@@ -106,10 +119,30 @@ module tiny_mcu (
     logic [2:0] reg_write_addr;
     logic reg_write_en;
     assign reg_read_addr = (seq_state == STATE_DECODE) ? src_addr : dst_addr;
-    assign reg_write_data = (inst_type != 2'b11)?alu_result:(imm_type == 2'b00)?psram_read_data:imm;
-    assign reg_write_en = psram_read_data_valid|
+    assign reg_write_en = psram_read_data_valid|periph_read_data_valid|
                           ((inst_type == 2'b11) & (imm_type == 2'b10) & (seq_state == STATE_DECODE))|
                           (seq_state == STATE_ALU_EXEC);
+    //data selector for register file
+    always_comb begin
+        if(inst_type != 2'b11)begin
+            reg_write_data = alu_result;
+        end
+        else begin
+            if(imm_type == 2'b00)begin
+                if(periph_read_data_valid == 1'b1)begin
+                    reg_write_data = periph_read_data;
+                end
+                else begin
+                    reg_write_data = psram_read_data;
+                end
+            end
+            else begin
+                reg_write_data = imm;
+            end
+        end
+
+    end
+    //address selector for register file
     always_comb begin
         if(inst_type == 2'b11)begin
             if(imm_type != 2'b10)begin
@@ -157,9 +190,10 @@ module tiny_mcu (
 
     assign psram_write_data = reg_read_result;
     assign mem_addr = (seq_state == STATE_FETCH) ? pc_addr : {imm[7:0],src_reg_buf};
-    //メモリコントローラ経由でメモリアクセスを行うのは
-    //Flashへのアクセス
-    //Load命令/Store命令かつ、アドレスの上位4bitが0xfでないとき
+    //Use SPI Memory Controller when:
+    //Accessing to flash memory
+    //Load/Store Instruction and addr[15:12] is not 0xf
+    //0xf000 to 0xffff is reserved for peripherals
     assign spi_mem_addr_valid = (seq_state == STATE_FETCH) |
                                 (((seq_state == STATE_LOAD_MEM)|(seq_state == STATE_STORE_MEM)) & (mem_addr[15:12] != 4'hf));
     always_comb begin
@@ -196,7 +230,26 @@ module tiny_mcu (
     );
 
     //Peripherals
+    logic [7:0] periph_read_data;
+    logic periph_read_data_valid;
     logic periph_addr_valid;
-    //assign periph_addr_valid = 
+
+    assign periph_addr_valid = (((seq_state == STATE_LOAD_MEM)|(seq_state == STATE_STORE_MEM)) & (mem_addr[15:12] == 4'hf));
+    mcu_peripheral PERI(
+        .clk_in(clk_in),
+        .reset_in(reset_in),
+        .sclk_out(periph_spi_sclk_out),
+        .mosi_out(periph_spi_mosi_out),
+        .cs_out(periph_spi_cs_out),
+        .gpio_in(periph_gpio_in),
+        .gpio_out(periph_gpio_out),
+        .gpio_dir_out(periph_gpio_dir_out),
+        .periph_data_out(periph_read_data),
+        .periph_data_valid_out(periph_read_data_valid),
+        .periph_data_in(psram_write_data),
+        .periph_addr_in(mem_addr[3:0]),
+        .periph_addr_valid_in(periph_addr_valid),
+        .periph_write_en_in(mem_type == TYPE_DMEM_WRITE)
+    );
     
 endmodule

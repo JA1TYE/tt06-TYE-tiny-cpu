@@ -11,7 +11,7 @@ module spi_mem_sim();
     logic psram_cs_out;
     logic sclk_out;
     logic mosi_out;
-    logic miso_in;
+    tri miso_in;
 
     //System bus signals
     logic [15:0] addr_in;
@@ -28,7 +28,8 @@ module spi_mem_sim();
     logic flash_miso_out;
     logic psram_miso_out;
 
-    assign miso_in = (flash_cs_out == 1'b0) ? flash_miso_out : psram_miso_out;
+    assign miso_in = flash_miso_out;
+    assign miso_in = psram_miso_out;
 
     spi_flash_controller DUT(
         .clk_in(clk_in),

@@ -15,15 +15,25 @@ module tt_um_ja1tye_tiny_cpu (
     input  wire       clk,
     input  wire       rst_n
 );
+    //Pin assignment
+    //uo_out
+    //  0: SPI SCLK
+    //  1: CS for Flash
+    //  2: CS for PSRAM
+    //  3: MOSI
+    
     logic miso_in;
     logic sclk_out;
     logic flash_cs_out;
     logic psram_cs_out;
     logic mosi_out;
-
-    // All output pins must be assigned. If not used, assign to 0.
-    assign uio_out = 0;
-    assign uio_oe  = 0;
+    logic periph_spi_sclk_out;
+    logic periph_spi_mosi_out;
+    logic periph_spi_cs_out;
+    logic [7:0] periph_gpio_out;
+    logic [7:0] periph_gpio_dir_out;
+    logic [7:0] periph_gpio_in;
+    logic pc_update_pulse_out;
 
     assign miso_in = ui_in[0];
 
@@ -31,7 +41,14 @@ module tt_um_ja1tye_tiny_cpu (
     assign uo_out[1] = flash_cs_out;
     assign uo_out[2] = psram_cs_out;
     assign uo_out[3] = mosi_out;
-    assign uo_out[7:4] = 4'h0;
+    assign uo_out[4] = periph_spi_sclk_out;
+    assign uo_out[5] = periph_spi_mosi_out;
+    assign uo_out[6] = periph_spi_cs_out;
+    assign uo_out[7] = pc_update_pulse_out;
+
+    assign uio_out = periph_gpio_out;
+    assign uio_oe  = periph_gpio_dir_out;
+    assign uio_in  = periph_gpio_in;
 
   tiny_mcu MCU(
     .clk_in(clk),
@@ -40,7 +57,14 @@ module tt_um_ja1tye_tiny_cpu (
     .flash_cs_out(flash_cs_out),
     .psram_cs_out(psram_cs_out),
     .mosi_out(mosi_out),
-    .miso_in(miso_in)
+    .miso_in(miso_in),
+    .periph_spi_sclk_out(periph_spi_sclk_out),
+    .periph_spi_mosi_out(periph_spi_mosi_out),
+    .periph_spi_cs_out(periph_spi_cs_out),
+    .periph_gpio_out(periph_gpio_out),
+    .periph_gpio_dir_out(periph_gpio_dir_out),
+    .periph_gpio_in(periph_gpio_in),
+    .pc_update_pulse_out(pc_update_pulse_out)
   );
 
 endmodule

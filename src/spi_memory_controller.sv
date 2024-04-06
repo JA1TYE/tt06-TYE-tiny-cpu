@@ -69,7 +69,6 @@ always@(posedge clk_in)begin
         psram_cs_out <= 1'b1;
         shift_reg <= 8'h00;
         miso_buf <= 1'b0;
-        //busy_out <= 1'b0;
         
         write_data_reg <= 8'h00;
 
@@ -80,7 +79,6 @@ always@(posedge clk_in)begin
             if(addr_valid_in == 1'b1)begin
                 addr_reg <= addr_in;
                 mem_type <= mem_type_in;
-                //busy_out <= 1'b1;
                 clock_counter <= 4'h0;
                 
                 if(mem_type_in == TYPE_IMEM_READ)begin
@@ -106,7 +104,6 @@ always@(posedge clk_in)begin
                 clock_counter <= 4'h0;
                 flash_cs_out <= 1'b1;
                 psram_cs_out <= 1'b1;
-                //busy_out <= 1'b0;
                 sclk_out <= 1'b0;
             end
         end

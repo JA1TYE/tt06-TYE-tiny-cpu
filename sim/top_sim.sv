@@ -10,12 +10,15 @@ module top_sim();
     logic psram_cs_out;
     logic sclk_out;
     logic mosi_out;
-    logic miso_in;
+    tri miso_in;
 
     logic flash_miso_out;
     logic psram_miso_out;
 
-    assign miso_in = (flash_cs_out == 1'b0) ? flash_miso_out : psram_miso_out;
+    //assign miso_in = (flash_cs_out == 1'b0) ? flash_miso_out : psram_miso_out;
+
+    assign miso_in = flash_miso_out;
+    assign miso_in = psram_miso_out;
 
     logic [7:0]ui_in;
     logic [7:0]uo_out;

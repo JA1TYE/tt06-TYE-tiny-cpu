@@ -28,7 +28,7 @@ module SPI_FLASH(
         out_data_reg <= 8'b0;
     end
 
-    assign miso_out = out_data_reg[7];
+    assign miso_out = (cs_in == 1'b0)?out_data_reg[7]:1'bz;
 
     always@(posedge sclk_in)begin//Sample Phase
         if(cs_in == 1'b0)begin
@@ -105,7 +105,7 @@ module SPI_PSRAM (
         out_data_reg <= 8'b0;
     end
 
-    assign miso_out = out_data_reg[7];
+    assign miso_out = (cs_in == 1'b0)?out_data_reg[7]:1'bz;
 
     always@(posedge sclk_in)begin//Sample Phase
         if(cs_in == 1'b0)begin
