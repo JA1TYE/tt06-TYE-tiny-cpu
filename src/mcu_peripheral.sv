@@ -34,6 +34,15 @@ module mcu_peripheral(
 logic [7:0] gpio_in_sync;
 logic [7:0] gpio_in_reg;
 
+//SPI Shift Register
+logic [7:0] shift_reg;
+logic [2:0] clock_counter;
+logic [3:0] clock_div;
+logic [3:0] div_val_reg;
+logic busy_flag;
+
+assign mosi_out = shift_reg[7];
+
 //Memory Interface
 always@(posedge clk_in) begin
     //2FF Synchronizer
@@ -46,8 +55,38 @@ always@(posedge clk_in) begin
         gpio_dir_out <= 8'h00;
         gpio_out <= 8'h00;
         cs_out <= 1'b1;
+        //SPI registers
+        shift_reg <= 8'h00;
+        clock_counter <= 3'b0;
+        clock_div <= 4'b0;
+        busy_flag <= 1'b0;
+        sclk_out <= 1'b0;
     end
     else begin
+        //SPI Shift Register
+        if(busy_flag == 1'b1)begin
+            if(clock_div == div_val_reg) begin
+                clock_div <= 4'b0;
+                if(sclk_out == 1'b0)begin//Sample Edge
+                    sclk_out <= 1'b1;
+                end
+                else begin//Shift Edge
+                    sclk_out <= 1'b0;
+                    if(clock_counter == 3'h7)begin
+                        clock_counter <= 3'h0;
+                        busy_flag <= 1'b0;
+                    end
+                    else begin
+                        clock_counter <= clock_counter + 3'h1;
+                        shift_reg <= {shift_reg[6:0],shift_reg[7]};
+                    end
+                end
+            end
+            else begin
+                clock_div <= clock_div + 4'h1;
+            end
+        end
+        //Address decoder
         if(periph_addr_valid_in) begin
             if(periph_write_en_in) begin//Write
                 case(periph_addr_in[3:0])
@@ -104,49 +143,6 @@ always@(posedge clk_in) begin
         end
         else begin
             periph_data_valid_out <= 1'b0;
-        end
-    end
-end
-
-//SPI Shift Register
-logic [7:0] shift_reg;
-logic [2:0] clock_counter;
-logic [3:0] clock_div;
-logic [3:0] div_val_reg;
-logic busy_flag;
-
-assign mosi_out = shift_reg[7];
-
-always@(posedge clk_in) begin
-    if(reset_in) begin
-        shift_reg <= 8'h00;
-        clock_counter <= 3'b0;
-        clock_div <= 4'b0;
-        busy_flag <= 1'b0;
-        sclk_out <= 1'b0;
-    end
-    else begin
-        if(busy_flag == 1'b1)begin
-            if(clock_div == div_val_reg) begin
-                clock_div <= 4'b0;
-                if(sclk_out == 1'b0)begin//Sample Edge
-                    sclk_out <= 1'b1;
-                end
-                else begin//Shift Edge
-                    sclk_out <= 1'b0;
-                    if(clock_counter == 3'h7)begin
-                        clock_counter <= 3'h0;
-                        busy_flag <= 1'b0;
-                    end
-                    else begin
-                        clock_counter <= clock_counter + 3'h1;
-                        shift_reg <= {shift_reg[6:0],shift_reg[7]};
-                    end
-                end
-            end
-            else begin
-                clock_div <= clock_div + 4'h1;
-            end
         end
     end
 end
