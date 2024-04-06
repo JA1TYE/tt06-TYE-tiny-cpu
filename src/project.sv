@@ -48,7 +48,7 @@ module tt_um_ja1tye_tiny_cpu (
 
     assign uio_out = periph_gpio_out;
     assign uio_oe  = periph_gpio_dir_out;
-    assign uio_in  = periph_gpio_in;
+    assign periph_gpio_in = uio_in;
 
   tiny_mcu MCU(
     .clk_in(clk),

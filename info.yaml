@@ -26,6 +26,7 @@ project:
     - "spi_memory_controller.sv"
     - "status_register.sv"
     - "tiny_mcu.sv"
+    - "mcu_peripheral.sv"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
