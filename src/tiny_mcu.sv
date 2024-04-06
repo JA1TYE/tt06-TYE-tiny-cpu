@@ -245,7 +245,7 @@ module tiny_mcu (
         .periph_data_out(periph_read_data),
         .periph_data_valid_out(periph_read_data_valid),
         .periph_data_in(psram_write_data),
-        .periph_addr_in(mem_addr[3:0]),
+        .periph_addr_in(mem_addr[2:0]),
         .periph_addr_valid_in(periph_addr_valid),
         .periph_write_en_in(mem_type == TYPE_DMEM_WRITE)
     );

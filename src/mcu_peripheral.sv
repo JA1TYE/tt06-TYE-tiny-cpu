@@ -16,7 +16,7 @@ module mcu_peripheral(
     output logic [7:0] periph_data_out,
     output logic periph_data_valid_out,
     input logic  [7:0] periph_data_in,
-    input logic [3:0]periph_addr_in,
+    input logic [2:0]periph_addr_in,
     input logic periph_addr_valid_in,
     input logic periph_write_en_in
 );
@@ -89,7 +89,7 @@ always@(posedge clk_in) begin
         //Address decoder
         if(periph_addr_valid_in) begin
             if(periph_write_en_in) begin//Write
-                case(periph_addr_in[3:0])
+                case(periph_addr_in[2:0])
                     4'h0:begin//GPIO Dir
                         gpio_dir_out <= periph_data_in;
                     end
@@ -112,7 +112,7 @@ always@(posedge clk_in) begin
                 periph_data_valid_out <= 1'b0;
             end
             else begin//Read
-                case(periph_addr_in[3:0])
+                case(periph_addr_in[2:0])
                     4'h0:begin//GPIO Dir
                         periph_data_out <= gpio_dir_out;
                     end
