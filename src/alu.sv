@@ -25,7 +25,7 @@ module alu(
     assign status_out = {carry_out,sign_out,ovf_out,zero_out};
     assign sign_out = result_out[7];
     assign zero_out = (result_out == 8'h0);
-    assign ovf_temp = a_in[7] & b_in[7] & ~result_out[7] | ~a_in[7] & ~b_in[7] & result_out[7];
+    assign ovf_temp = adder_a_in[7] & adder_b_in[7] & ~adder_result_out[7] | ~adder_a_in[7] & ~adder_b_in[7] & adder_result_out[7];
 
     assign adder_a_in = a_in;
     always_comb begin

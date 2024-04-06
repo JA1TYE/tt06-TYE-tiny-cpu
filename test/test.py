@@ -10,7 +10,7 @@ async def test_adder(dut):
   dut._log.info("Start")
   
   # Our example module doesn't use clock and reset, but we show how to use them here anyway.
-  clock = Clock(dut.clk, 10, units="us")
+  clock = Clock(dut.clk, 10, units="ns")
   cocotb.start_soon(clock.start())
 
   # Reset
@@ -23,6 +23,5 @@ async def test_adder(dut):
   # Set the input values, wait one clock cycle, and check the output
   dut._log.info("Test")
 
-  await ClockCycles(dut.clk, 100000)
-  dut._log.info(f"Result: {dut.user_project.MCU.pc_addr.value}")
-  assert dut.user_project.MCU.pc_addr.value == 0x001c
+  await ClockCycles(dut.clk, 10000)
+  assert dut.uio_out == 0xa5

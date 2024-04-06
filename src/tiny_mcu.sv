@@ -116,7 +116,7 @@ module tiny_mcu (
     logic [7:0] reg_write_data;
     logic [2:0] reg_write_addr;
     logic reg_write_en;
-    assign reg_read_addr = (seq_state == STATE_DECODE) ? src_addr : dst_addr;
+    assign reg_read_addr = (seq_state == STATE_DECODE) ? src_addr : (seq_state != STATE_STORE_MEM) ? dst_addr : 3'h0;
     assign reg_write_en = psram_read_data_valid|periph_read_data_valid|
                           ((inst_type == 2'b11) & (imm_type == 2'b10) & (seq_state == STATE_DECODE))|
                           (seq_state == STATE_ALU_EXEC);
