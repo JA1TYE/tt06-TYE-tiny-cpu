@@ -96,7 +96,6 @@ module tiny_mcu (
     logic [2:0] dst_addr;
     logic [7:0] imm;
     logic [1:0] imm_type;
-    logic cond_en;
     logic [1:0] inst_type;
     logic [3:0] subtype_flag;
 
@@ -106,7 +105,6 @@ module tiny_mcu (
         .dst_addr_out(dst_addr),
         .imm_out(imm),
         .imm_type_out(imm_type),
-        .cond_en_out(cond_en),
         .inst_type_out(inst_type),
         .subtype_flag_out(subtype_flag)
     );

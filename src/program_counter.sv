@@ -13,7 +13,7 @@ logic [14:0] program_counter;
 
 assign program_counter_out = {program_counter[14:0], 1'b0};
 
-always@(posedge clk_in or posedge reset_in) begin
+always@(posedge clk_in) begin
     if(reset_in) begin
         program_counter <= 15'h0000;
     end
