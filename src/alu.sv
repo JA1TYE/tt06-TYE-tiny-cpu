@@ -73,7 +73,12 @@ module alu(
                 carry_out = carry_in;
                 ovf_out = ovf_in;
             end
-            4'hb: begin//MOV
+            4'hb : begin//XOR
+                result_out = a_in ^ b_in;
+                carry_out = carry_in;
+                ovf_out = ovf_in;
+            end
+            4'hc: begin//MOV
                 result_out = a_in;
                 carry_out = carry_in;
                 ovf_out = ovf_in;
