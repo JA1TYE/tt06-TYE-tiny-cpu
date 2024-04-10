@@ -24,4 +24,4 @@ async def test_adder(dut):
   dut._log.info("Test")
 
   await ClockCycles(dut.clk, 10000)
-  assert dut.uio_out == 0xa5
+  assert dut.uio_out == 0xff

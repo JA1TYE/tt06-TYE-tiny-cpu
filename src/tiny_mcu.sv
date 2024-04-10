@@ -22,8 +22,9 @@ module tiny_mcu (
     output logic pc_update_pulse_out
 );
 
+    logic dmem_data_read_done;
     assign pc_update_pulse_out = (seq_state == STATE_UPDATE_PC);
-
+    assign dmem_data_read_done = psram_read_data_valid|periph_read_data_valid;
     //Internal signals for sequencer
     sys_state_t seq_state;
     sequencer CPU_SEQ(
@@ -31,7 +32,7 @@ module tiny_mcu (
         .reset_in(reset_in),
         .mem_busy_in(mem_busy),
         .inst_fetch_done_in(flash_read_data_valid),
-        .data_read_done_in(psram_read_data_valid),
+        .data_read_done_in(dmem_data_read_done),
         .inst_type_in(inst_type),
         .imm_type_in(imm_type),
         .seq_state_out(seq_state)
