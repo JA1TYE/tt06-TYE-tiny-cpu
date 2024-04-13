@@ -24,7 +24,7 @@ Other than the general-purpose registers, this CPU has 4-bit status register. Bi
 Status register is updated when R-Type instructions are executed.
 
 Flags in status register cannot use as an operand of instruction.
-SCF (Set Condition Flag) instruction copies status of these flag to condition bit.
+SCF (Set Condition bit from Flag) instruction copies status of these flag to condition bit.
 Please see description of SCF instruction for details.
 
 ## Instruction set
@@ -79,7 +79,7 @@ SCF and NOP are F-Type instruction. F-Type instruction format is below:
 SCF instruction copies flag bits to the condition bit based on bit mask in the instruction bit[3:0].
 For example, if the instruciton bit[3:0] is 8 (4'b1000), Carry flag is copied to the condition bit.
 
-You can make conditional branch instruction in combination with GOTO instuction and SCF instruction. For example, "Branch if carry" instruction can be achieved like below:
+You can make conditional branch instruction in combination with GOTO instruction and SCF instruction. For example, "Branch if carry" instruction can be achieved like below:
 ```C
 //Set jump destination address (0xff00) to $6 and $7
 LDI $6,0xff
