@@ -1,3 +1,4 @@
+`default_nettype none
 module spi_flash_controller (
     //Control signals
     input wire clk_in,

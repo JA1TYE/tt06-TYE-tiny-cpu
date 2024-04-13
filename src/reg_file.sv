@@ -1,3 +1,4 @@
+`default_nettype none
 //8bit wide x 8 locations register file
 module reg_file (
     //Control signals

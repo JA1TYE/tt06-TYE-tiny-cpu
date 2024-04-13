@@ -1,3 +1,4 @@
+`default_nettype none
 module instruction_register(
     input logic clk_in,
     input logic reset_in,

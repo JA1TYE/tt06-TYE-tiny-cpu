@@ -1,4 +1,5 @@
 //8-bit alu module
+`default_nettype none
 module alu(
     input logic [7:0] a_in,
     input logic [7:0] b_in,

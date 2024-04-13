@@ -1,3 +1,4 @@
+`default_nettype none
 module mcu_peripheral(
     input logic clk_in,
     input logic reset_in,
