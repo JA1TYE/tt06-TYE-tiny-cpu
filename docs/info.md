@@ -46,6 +46,7 @@ This CPU has 8 general-purpose registers. These registers can be used as the des
 In addition, register 0 ("$0" in tt06-tmasm) has special function that the destination/source register of Load/Store instructions.
 
 Other than the general-purpose registers, this CPU has 4-bit status register. Bit definition is below:
+
 |Bit|Name|Description|Abbreviation|
 |---|---|---|---|
 |0|Zero Flag|Set if the result is zero|Z|
@@ -79,6 +80,7 @@ I-Type instruction format is below. I-Type instructions do not affect the flag r
 
 #### R-Type Instructions
 R-Type instructions are Register-Register operation. Its format is below:
+
 |Instruction|Mnemonic|bit[15:14]|bit[13]|bit[12:11]|bit[10:8]|bit[7:5]|bit[4:0]|Operation|Affected Flags|
 |---|---|---|---|---|---|---|---|---|---|
 |Shift Logical Right|SLR|2|CondEn|0|Rs|Rd|0|{Rd,C} <- {1'b0,Rs}|Z,S,C|
@@ -101,6 +103,7 @@ J-Type instruction is GOTO instruction only.
 
 #### F-Type Instruction
 SCF and NOP are F-Type instruction. F-Type instruction format is below:
+
 |Instruction|Mnemonic|bit[15:14]|bit[13]|bit[12:9]|bit[8]|bit[7:4]|bit[3]|bit[2]|bit[1]|bit[0]|Operation|
 |---|---|---|---|---|---|---|---|---|---|---|---|
 |Set Condition bit from Flag|SCF|0|CondEn|4|Inv|0|C|S|V|Z|Condition <- (Inv ^ (Status & bit[3:0]))|
