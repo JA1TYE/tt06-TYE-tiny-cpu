@@ -54,8 +54,8 @@ These pins are mapped 8-bit registers. Upper 4-bits represent output-only pins.
 |0xF001|GPIO Output Data|Output data value|
 |0xF002|GPIO Input Data|Current pin status|
 
-#### SPI Master
-SPI peripheral only supports 8-bit data, mode 0.
+#### SPI Tx
+SPI Tx only supports 8-bit data, mode 0.
 CS signal is not controlled automatically.
 
 |Address|Name|Description|
@@ -69,7 +69,7 @@ CS signal is not controlled automatically.
 Write program to SPI Flash (by using ROM Writer etc.) and connect it to the board (Please also see the Pinout section).
 SPI PSRAM is also needed if you need data storage other than general-purpose regsiters.
 
-When you clear rst_n, then CPU will load instruction from 0x0000 on SPI Flash.
+When you negate rst_n, then CPU will load instruction from 0x0000 on SPI Flash.
 
 ## External hardware
 - SPI Flash Memory (W25Q128 etc.)
